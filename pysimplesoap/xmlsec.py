@@ -23,76 +23,76 @@ try:
     import lxml.etree
 except ImportError:
     lxml = None
-    
+
 # Features:
 #  * Uses M2Crypto and lxml (libxml2) but it is independent from libxmlsec1
 #  * Sign, Verify, Encrypt & Decrypt XML documents
 
 # Enveloping templates ("by reference": signature is parent):
 SIGN_REF_TMPL = """
-<SignedInfo xmlns="http://www.w3.org/2000/09/xmldsig#">
-  <CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" />
-  <SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" />
-  <Reference URI="%(ref_uri)s">
-    <Transforms>
-      <Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" />
-    </Transforms>
-    <DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
-    <DigestValue>%(digest_value)s</DigestValue>
-  </Reference>
-</SignedInfo>
+<ds:SignedInfo xmlns="http://www.w3.org/2000/09/xmldsig#">
+  <ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" />
+  <ds:SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" />
+  <ds:Reference URI="%(ref_uri)s">
+    <ds:Transforms>
+      <ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" />
+    </ds:Transforms>
+    <ds:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
+    <ds:DigestValue>%(digest_value)s</ds:DigestValue>
+  </ds:Reference>
+</ds:SignedInfo>
 """
 SIGNED_TMPL = """
 <?xml version="1.0" encoding="UTF-8"?>
-<Signature xmlns="http://www.w3.org/2000/09/xmldsig#">
+<ds:Signature xmlns="http://www.w3.org/2000/09/xmldsig#">
 %(signed_info)s
-<SignatureValue>%(signature_value)s</SignatureValue>
+<ds:SignatureValue>%(signature_value)s</ds:SignatureValue>
 %(key_info)s
 %(ref_xml)s
-</Signature>
+</ds:Signature>
 """
 
 # Enveloped templates (signature is child, the reference is the root object):
 SIGN_ENV_TMPL = """
-<SignedInfo xmlns="http://www.w3.org/2000/09/xmldsig#">
-  <CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"/>
-  <SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1"/>
-  <Reference URI="">
-    <Transforms>
-       <Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/>
-       <Transform Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"/>
-    </Transforms>
-    <DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/>
-    <DigestValue>%(digest_value)s</DigestValue>
-  </Reference>
-</SignedInfo>
+<ds:SignedInfo xmlns="http://www.w3.org/2000/09/xmldsig#">
+  <ds:CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"/>
+  <ds:SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1"/>
+  <ds:Reference URI="">
+    <ds:Transforms>
+       <ds:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/>
+       <ds:Transform Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"/>
+    </ds:Transforms>
+    <ds:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/>
+    <ds:DigestValue>%(digest_value)s</ds:DigestValue>
+  </ds:Reference>
+</ds:SignedInfo>
 """
-SIGNATURE_TMPL = """<Signature xmlns="http://www.w3.org/2000/09/xmldsig#">
+SIGNATURE_TMPL = """<ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
 %(signed_info)s
-<SignatureValue>%(signature_value)s</SignatureValue>
+<ds:SignatureValue>%(signature_value)s</ds:SignatureValue>
 %(key_info)s
-</Signature>"""
+</ds:Signature>"""
 
 KEY_INFO_RSA_TMPL = """
-<KeyInfo>
-  <KeyValue>
-    <RSAKeyValue>
-      <Modulus>%(modulus)s</Modulus>
-      <Exponent>%(exponent)s</Exponent>
-    </RSAKeyValue>
-  </KeyValue>
-</KeyInfo>
+<ds:KeyInfo>
+  <ds:KeyValue>
+    <ds:RSAKeyValue>
+      <ds:Modulus>%(modulus)s</ds:Modulus>
+      <ds:Exponent>%(exponent)s</ds:Exponent>
+    </ds:RSAKeyValue>
+  </ds:KeyValue>
+</ds:KeyInfo>
 """
 
 KEY_INFO_X509_TMPL = """
-<KeyInfo>
-    <X509Data>
-        <X509IssuerSerial>
-            <X509IssuerName>%(issuer_name)s</X509IssuerName>
-            <X509SerialNumber>%(serial_number)s</X509SerialNumber>
-        </X509IssuerSerial>
-    </X509Data>
-</KeyInfo>
+<ds:KeyInfo>
+    <ds:X509Data>
+        <ds:X509IssuerSerial>
+            <ds:X509IssuerName>%(issuer_name)s</ds:X509IssuerName>
+            <ds:X509SerialNumber>%(serial_number)s</ds:X509SerialNumber>
+        </ds:X509IssuerSerial>
+    </ds:X509Data>
+</ds:KeyInfo>
 """
 
 def canonicalize(xml, c14n_exc=True):
@@ -122,7 +122,7 @@ def rsa_sign(xml, ref_uri, private_key, password=None, cert=None, c14n_exc=True,
     # normalize the referenced xml (to compute the SHA1 hash)
     ref_xml = canonicalize(xml, c14n_exc)
     # create the signed xml normalized (with the referenced uri and hash value)
-    signed_info = sign_template % {'ref_uri': ref_uri, 
+    signed_info = sign_template % {'ref_uri': ref_uri,
                                    'digest_value': sha1_hash_digest(ref_xml)}
     signed_info = canonicalize(signed_info, c14n_exc)
     # Sign the SHA1 digest of the signed xml using RSA cipher
@@ -215,6 +215,6 @@ if __name__ == "__main__":
     print (sample_xml % (SIGNATURE_TMPL % vars))
 
     # basic signature verification:
-    public_key = x509_extract_rsa_public_key(open("zunimercado.crt").read())
+    public_key = x509_extract_rsa_public_key(open("certificate.crt").read())
     assert rsa_verify(vars['signed_info'], vars['signature_value'], public_key,
                       c14n_exc=False)
