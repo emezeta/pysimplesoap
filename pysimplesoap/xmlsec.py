@@ -44,7 +44,7 @@ SIGN_REF_TMPL = """
 """
 SIGNED_TMPL = """
 <?xml version="1.0" encoding="UTF-8"?>
-<ds:Signature xmlns="http://www.w3.org/2000/09/xmldsig#">
+<ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
 %(signed_info)s
 <ds:SignatureValue>%(signature_value)s</ds:SignatureValue>
 %(key_info)s
@@ -54,7 +54,7 @@ SIGNED_TMPL = """
 
 # Enveloped templates (signature is child, the reference is the root object):
 SIGN_ENV_TMPL = """
-<ds:SignedInfo xmlns="http://www.w3.org/2000/09/xmldsig#">
+<ds:SignedInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
   <ds:CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"/>
   <ds:SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1"/>
   <ds:Reference URI="">
